@@ -1,5 +1,6 @@
 package com.crownless.enchants.api
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.PropertySource
 import org.springframework.stereotype.Component
@@ -11,51 +12,32 @@ import java.lang.StringBuilder
 
 @RestController
 @RequestMapping("/api")
-@PropertySource("classpath:application.properties")
 class ApiController {
 
-    @Value("\${rom.enchant.files}")
-    lateinit var pathToDir: String
+    @Autowired
+    lateinit var enchantsReader: EnchantsFileReader
 
     @GetMapping("/ping")
     fun ping() = "pong"
 
     @GetMapping("/sea-el")
     fun getSeaElFiles() : String {
-        return readFilesInDir("sea-el")
+        return enchantsReader.readSeaElEnchants()
     }
 
     @GetMapping("/sea-mp")
     fun getSeaMpFiles() : String {
-        return readFilesInDir("sea-mp")
+        return enchantsReader.readSeaMpEnchants()
     }
 
     @GetMapping("/global")
     fun getGlobalFiles() : String {
-        return readFilesInDir("global")
+        return enchantsReader.readGlobalEnchants()
     }
 
     @GetMapping("/euro")
     fun getEuroFiles() : String {
-        return readFilesInDir("euro")
-    }
-
-    private fun readFilesInDir(dir: String): String {
-        val data = StringBuilder()
-        File("$pathToDir/$dir/cached").walk().forEach { file ->
-            if (file.isFile) {
-                if (data.isNotEmpty()) {
-                    data.append(",")
-                } else {
-                    data.append("[")
-                }
-                data.append(file.readText())
-            }
-        }
-        if (data.isNotEmpty()) {
-            data.append("]")
-        }
-        return data.toString()
+        return enchantsReader.readEuroEnchants()
     }
 
 }
